@@ -1,0 +1,32 @@
+meta {
+  name: brodcast
+  type: ws
+  seq: 2
+}
+
+ws {
+  url: ws://localhost:8080/ws/broadcast
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: xml
+  content: '''
+    <Request>
+        <Method>GET</Method>
+        <Host>example.amazonaws.com</Host>
+    
+        <Headers>
+            <x-amz-date>20260505T120000Z</x-amz-date>
+            <Authorization>
+                AWS4-HMAC-SHA256
+                Credential=AKIAEXAMPLE/20260505/us-east-1/service/aws4_request,
+                SignedHeaders=host;x-amz-date,
+                Signature=abc123signature
+            </Authorization>
+        </Headers>
+    </Request>
+  '''
+}

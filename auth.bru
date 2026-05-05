@@ -1,0 +1,19 @@
+meta {
+  name: auth
+  type: ws
+  seq: 4
+}
+
+ws {
+  url: ws://localhost:8080/ws/auth?token=test-token-123
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {}
+  '''
+}

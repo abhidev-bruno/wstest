@@ -1,0 +1,138 @@
+meta {
+  name: ws-collection
+}
+
+docs {
+  # WebSocket Test Server
+  
+  A local WebSocket + Socket.IO test server with multiple endpoints covering the common scenarios you'll want to test.
+  
+  ## Setup
+  
+  ```bash
+  # 1. Install production dependencies
+  npm install express ws socket.io cors uuid
+  
+  # 2. Install dev dependency (auto-reload)
+  npm install --save-dev nodemon
+  
+  # OR just run this one-liner from inside the folder:
+  npm install
+  ```
+  
+  ## Run
+  
+  ```bash
+  npm start        # plain node
+  npm run dev      # with nodemon (auto-restart on file changes)
+  ```
+  
+  Server runs on `http://localhost:8080`. Change with `PORT=3000 npm start`.
+  
+  ---
+  
+  ## Endpoints
+  
+  ### REST (for inspection / triggering)
+  
+  | Method | Path          | Description                                   |
+  |--------|---------------|-----------------------------------------------|
+  | GET    | `/`           | Lists all endpoints                           |
+  | GET    | `/health`     | Health check + uptime                         |
+  | GET    | `/clients`    | Count of connected clients per endpoint       |
+  | POST   | `/broadcast`  | Server-triggered broadcast to `/ws/broadcast` |
+  
+  ### WebSocket
+  
+  | URL                                                | Purpose                                              |
+  |----------------------------------------------------|------------------------------------------------------|
+  | `ws://localhost:8080/ws/echo`                      | Echoes anything you send (text or binary)            |
+  | `ws://localhost:8080/ws/broadcast`                 | Sends your message to all connected clients          |
+  | `ws://localhost:8080/ws/chat?username=alice`       | Chat room with join/leave notifications              |
+  | `ws://localhost:8080/ws/json`                      | JSON-only with actions: `ping`, `echo`, `time`       |
+  | `ws://localhost:8080/ws/auth?token=test-token-123` | Token-authenticated (rejects with 401 if invalid)    |
+  | `ws://localhost:8080/ws/heartbeat`                 | Server pings every 10s; drops unresponsive clients   |
+  | `ws://localhost:8080/ws/counter`                   | Server pushes an incrementing tick every second      |
+  | `ws://localhost:8080/socket.io/`                   | Socket.IO with events + rooms                        |
+  
+  ---
+  
+  ## Testing
+  
+  ### Option 1 — `wscat` (CLI, recommended)
+  
+  ```bash
+  npm install -g wscat
+  
+  wscat -c ws://localhost:8080/ws/echo
+  wscat -c ws://localhost:8080/ws/json
+  wscat -c "ws://localhost:8080/ws/chat?username=alice"
+  wscat -c "ws://localhost:8080/ws/auth?token=test-token-123"
+  wscat -c ws://localhost:8080/ws/counter
+  ```
+  
+  Then type messages and hit enter.
+  
+  ### Option 2 — curl (for REST + upgrade checks)
+  
+  ```bash
+  curl http://localhost:8080/
+  curl http://localhost:8080/health
+  curl http://localhost:8080/clients
+  curl -X POST http://localhost:8080/broadcast \
+    -H "Content-Type: application/json" \
+    -d '{"message":"hello everyone"}'
+  ```
+  
+  ### Option 3 — Postman / Hoppscotch / browser devtools
+  
+  Postman supports WebSocket requests natively — create a new WebSocket request and paste any of the URLs above.
+  
+  ### Option 4 — Node client
+  
+  ```js
+  const WebSocket = require('ws');
+  const ws = new WebSocket('ws://localhost:8080/ws/json');
+  ws.on('open', () => ws.send(JSON.stringify({ action: 'ping', payload: 'hi' })));
+  ws.on('message', (d) => console.log('←', d.toString()));
+  ```
+  
+  ### Option 5 — Socket.IO client
+  
+  ```js
+  const { io } = require('socket.io-client');
+  const socket = io('ws://localhost:8080');
+  socket.on('welcome', console.log);
+  socket.emit('ping', { hello: 'world' }, (ack) => console.log('ack:', ack));
+  socket.emit('join-room', 'general');
+  socket.emit('room-message', { room: 'general', message: 'hi room' });
+  ```
+  
+  ---
+  
+  ## JSON endpoint actions
+  
+  Send to `ws://localhost:8080/ws/json`:
+  
+  ```json
+  {"action": "ping", "payload": "anything"}
+  {"action": "echo", "payload": {"any": "data"}}
+  {"action": "time"}
+  ```
+  
+  ## Auth endpoint
+  
+  ```bash
+  # Good — connects
+  wscat -c "ws://localhost:8080/ws/auth?token=test-token-123"
+  
+  # Bad — server closes with 401
+  wscat -c "ws://localhost:8080/ws/auth?token=wrong"
+  
+  # Also works via header
+  wscat -c ws://localhost:8080/ws/auth -H "Authorization: Bearer test-token-123"
+  ```
+  
+  Change the token with `AUTH_TOKEN=my-secret npm start`.
+  
+}

@@ -1,0 +1,21 @@
+meta {
+  name: json-3
+  type: ws
+  seq: 9
+}
+
+ws {
+  url: ws://localhost:8080/ws/json
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "action": "time"
+    }
+  '''
+}

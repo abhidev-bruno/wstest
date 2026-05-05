@@ -1,0 +1,36 @@
+meta {
+  name: heartbeat
+  type: ws
+  seq: 5
+}
+
+ws {
+  url: ws://localhost:8080/ws/heartbeat
+  body: ws
+  auth: inherit
+}
+
+body:ws {
+  name: message 1
+  type: json
+  content: '''
+    {
+      "id": 0,
+      "category": {
+        "id": 0,
+        "name": "string"
+      },
+      "name": "doggie",
+      "photoUrls": [
+        "string"
+      ],
+      "tags": [
+        {
+          "id": 0,
+          "name": "string"
+        }
+      ],
+      "status": "available"
+    }
+  '''
+}
